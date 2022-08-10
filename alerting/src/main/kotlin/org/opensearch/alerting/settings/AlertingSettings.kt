@@ -202,7 +202,8 @@ class AlertingSettings(val client: Client, val settings: Settings) {
 
             override fun settings(): MutableIterator<Setting<*>> {
                 val settings = mutableListOf<Setting<*>>(
-                    METRICS_EXECUTION_FREQUENCY
+                    METRICS_EXECUTION_FREQUENCY,
+                    METRICS_STORE_TIME
                 )
                 return settings.iterator()
             }
