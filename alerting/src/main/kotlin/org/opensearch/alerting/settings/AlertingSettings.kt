@@ -181,23 +181,24 @@ class AlertingSettings(val client: Client, val settings: Settings) {
         val METRICS_STORE_TIME = Setting.timeSetting(
             METRICS_STORE_TIME_DEFAULT.key,
             METRICS_STORE_TIME_DEFAULT,
-            TimeValueValidator(internalClient, internalSettings),
+            ExecutionValidator(),
             Setting.Property.NodeScope, Setting.Property.Dynamic
         )
 
         val METRICS_EXECUTION_FREQUENCY = Setting.timeSetting(
             METRICS_EXECUTION_FREQUENCY_DEFAULT.key,
             METRICS_EXECUTION_FREQUENCY_DEFAULT,
-            TimeValueValidator(internalClient, internalSettings),
+            StorageValidator(),
             Setting.Property.NodeScope, Setting.Property.Dynamic
         )
-        internal class TimeValueValidator(val client: Client?, val clusterSettings: Settings?) : Setting.Validator<TimeValue> {
+        internal class ExecutionValidator : Setting.Validator<TimeValue> {
             override fun validate(value: TimeValue) {}
 
             override fun validate(value: TimeValue, settings: Map<Setting<*>, Any>) {
                 log.info("THIS IS SETTING $settings")
                 log.info("THIS IS VALUE $value")
-                log.info("THIS IS CLUSTERSETTINGS $clusterSettings")
+                val storageTime = settings[METRICS_STORE_TIME] as TimeValue
+                validateSettings(value, storageTime)
             }
 
             override fun settings(): MutableIterator<Setting<*>> {
@@ -207,21 +208,31 @@ class AlertingSettings(val client: Client, val settings: Settings) {
                 )
                 return settings.iterator()
             }
-            private fun validateExecutionFrequency(executionFrequency: TimeValue, storageTime: TimeValue) {
-                log.info("THIS IS VALIDATEEXECUTIONFREQUENCY PARAMS $executionFrequency, $storageTime")
-                log.info("THIS IS MINIMUM_TIME_VALUE $MINIMUM_TIME_VALUE")
+        }
 
-                if (executionFrequency < MINIMUM_TIME_VALUE || storageTime < MINIMUM_TIME_VALUE) {
-                    throw IllegalArgumentException(
-                        "Execution frequency or storage time cannot be less than $MINIMUM_TIME_VALUE."
-                    )
-                }
-                if (executionFrequency < storageTime) return
-                if (executionFrequency > storageTime) {
-                    throw IllegalArgumentException(
-                        "Execution frequency cannot be greater than the storage time."
-                    )
-                }
+        internal class StorageValidator : Setting.Validator<TimeValue> {
+            override fun validate(value: TimeValue) {}
+
+            override fun validate(value: TimeValue, settings: Map<Setting<*>, Any>) {
+                log.info("THIS IS SETTING $settings")
+                log.info("THIS IS VALUE $value")
+                val executionTime = settings[METRICS_EXECUTION_FREQUENCY] as TimeValue
+                validateSettings(executionTime, value)
+            }
+
+            override fun settings(): MutableIterator<Setting<*>> {
+                val settings = mutableListOf<Setting<*>>(
+                    METRICS_EXECUTION_FREQUENCY,
+                    METRICS_STORE_TIME
+                )
+                return settings.iterator()
+            }
+        }
+        private fun validateSettings(executionFrequency: TimeValue, storageTime: TimeValue) {
+            if (executionFrequency > storageTime) {
+                throw java.lang.IllegalArgumentException(
+                    "The execution frequency should be less than the storage time."
+                )
             }
         }
     }
