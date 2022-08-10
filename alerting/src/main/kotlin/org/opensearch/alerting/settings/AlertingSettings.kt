@@ -195,9 +195,8 @@ class AlertingSettings(val client: Client, val settings: Settings) {
             override fun validate(value: TimeValue) {}
 
             override fun validate(value: TimeValue, settings: Map<Setting<*>, Any>) {
-                log.info("THIS IS SETTING $settings")
-                log.info("THIS IS VALUE $value")
                 val storageTime = settings[METRICS_STORE_TIME] as TimeValue
+                log.info("THIS IS STORAGETIME $storageTime")
                 validateSettings(value, storageTime)
             }
 
@@ -214,9 +213,8 @@ class AlertingSettings(val client: Client, val settings: Settings) {
             override fun validate(value: TimeValue) {}
 
             override fun validate(value: TimeValue, settings: Map<Setting<*>, Any>) {
-                log.info("THIS IS SETTING $settings")
-                log.info("THIS IS VALUE $value")
                 val executionTime = settings[METRICS_EXECUTION_FREQUENCY] as TimeValue
+                log.info("THIS IS EXECUTIONTIME $executionTime")
                 validateSettings(executionTime, value)
             }
 
