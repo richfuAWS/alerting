@@ -181,14 +181,14 @@ class AlertingSettings(val client: Client, val settings: Settings) {
         val METRICS_STORE_TIME = Setting.timeSetting(
             METRICS_STORE_TIME_DEFAULT.key,
             METRICS_STORE_TIME_DEFAULT,
-            ExecutionValidator(),
+            StorageValidator(),
             Setting.Property.NodeScope, Setting.Property.Dynamic
         )
 
         val METRICS_EXECUTION_FREQUENCY = Setting.timeSetting(
             METRICS_EXECUTION_FREQUENCY_DEFAULT.key,
             METRICS_EXECUTION_FREQUENCY_DEFAULT,
-            StorageValidator(),
+            ExecutionValidator(),
             Setting.Property.NodeScope, Setting.Property.Dynamic
         )
         internal class ExecutionValidator : Setting.Validator<TimeValue> {
